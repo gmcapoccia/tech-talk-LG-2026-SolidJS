@@ -1,106 +1,55 @@
-import { createSignal } from 'solid-js'
-import heroImg from './assets/hero.png'
-import solidLogo from './assets/solid.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { createSignal } from 'solid-js';
+import Header from './components/header/Header';
+import Section from './components/section/Section';
+import SystemMetrics from './components/systemMetrics/SystemMetrics';
+import './App.scss';
+import { useFPS } from './hooks/useFPS';
+import { useMemory } from './hooks/useMemory';
+import { useCPULoad } from './hooks/useCPULoad';
+import { useUpdateTime } from './hooks/useUpdateTime';
 
 function App() {
-  const [count, setCount] = createSignal(0)
+  const [datasetSize, setDatasetSize] = createSignal(100);
+  const [updateRate, setUpdateRate] = createSignal(10);
+  const fps = useFPS();
+  const memory = useMemory();
+  const cpuLoad = useCPULoad(datasetSize, updateRate, fps);
+  const updateTime = useUpdateTime();
 
   return (
-    <>
-      <section id="center">
-        <div class="hero">
-          <img src={heroImg} class="base" width="170" height="179" alt="" />
-          <img src={solidLogo} class="framework" alt="Solid logo" />
-          <img src={viteLogo} class="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          class="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count()}
-        </button>
-      </section>
+    <div className="App">
+      <Header
+        datasetSize={datasetSize}
+        setDatasetSize={setDatasetSize}
+        updateRate={updateRate}
+        setUpdateRate={setUpdateRate}
+      />
 
-      <div class="ticks"></div>
+      <div className="metrics-container">
+        <Section 
+          fps={fps}
+          cpu={cpuLoad}
+          memory={memory}
+        />
+        <SystemMetrics 
+          fps={fps}
+          memory={memory}
+          updateTime={updateTime}
+        />
+      </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg class="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img class="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://solidjs.com/" target="_blank">
-                <img class="button-icon" src={solidLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg class="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg class="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg class="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg class="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg class="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      {/* SEGNAPOSTI PER LE PROSSIME COMPONENTI */}
+      {/* 
 
-      <div class="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      <main className="main-content">
+        <ActivityLogSection />
+        <Benchmark />
+      </main>
+
+      <MarketSummary />
+      */}
+    </div>
+  );
 }
 
-export default App
+export default App;
