@@ -19,6 +19,7 @@ $status-red: #ff3366;
     border-radius: 10px;
     width: 130px;
     height: 50px;
+    text-align: left;
 
     &:first-child {
         margin-top: 0;
@@ -29,6 +30,7 @@ $status-red: #ff3366;
         font-weight: 300;
         margin-bottom: 5px;
         margin: 0 0 5px 0;
+        line-height: normal;
     }
 
     .value{
