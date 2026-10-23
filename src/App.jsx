@@ -10,7 +10,8 @@ import { useFPS } from './hooks/useFPS';
 import { useMemory } from './hooks/useMemory';
 import { useCPULoad } from './hooks/useCPULoad';
 import { useUpdateTime } from './hooks/useUpdateTime';
-import { getTimeSeries } from './services/twelveDataService';
+// import { getTimeSeries } from './services/twelveDataService';
+import { generateMockTimeSeries } from './services/mockMarketData';
 
 /** PRINCIPALI DIFFERENZE
  * useState -> createSignal
@@ -38,7 +39,7 @@ const createBenchmarkDataset = (sourceData, datasetSize) => {
 };
 
 function App() {
-  const [loading, setLoading] = createSignal(true);
+  const [loading, setLoading] = createSignal(false);
   const [data, setData] = createSignal([]);
   const [sourceData, setSourceData] = createSignal([]);
   const [error, setError] = createSignal(null);
@@ -51,24 +52,22 @@ function App() {
   const cpuLoad = useCPULoad(datasetSize, updateRate, fps);
 
   createEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
+    setLoading(true);
+    try {
+      const mockData = generateMockTimeSeries(datasetSize());
+      const formattedData = mockData.map((item, index) => ({
+        ...item,
+        close: item.price.toString(),
+        datetime: item.trend[item.trend.length - 1]?.datetime || new Date().toISOString(),
+        id: `${item.symbol}-${index}`
+      }));
+      setData(formattedData);
       setError(null);
-      try {
-        const response = await getTimeSeries("AAPL", "1min", 30);
-        setSourceData(response.values ?? []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  });
-
-  createEffect(() => {
-    setData(createBenchmarkDataset(sourceData(), datasetSize()));
+    } catch (err) {
+      setError("Errore nella generazione dei dati mock");
+    } finally {
+      setLoading(false);
+    }
   });
 
   createEffect(() => {

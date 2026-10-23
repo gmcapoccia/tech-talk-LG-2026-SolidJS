@@ -61,7 +61,7 @@ body {
   padding: 0 2rem;
   max-width:1600px;
   margin: 0 auto;
-  text-align: center;
+
   min-height: 100svh;
   display: flex;
   flex-direction: column;
