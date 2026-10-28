@@ -1,3 +1,4 @@
+import { For } from "solid-js";
 import './Header.scss';
 
 export default function Header(props) {
@@ -37,28 +38,33 @@ export default function Header(props) {
         <div className="control-group">
           <span className="group-label">Dataset size</span>
           <div className="btn-group">
-            {datasetOptions.map((size) => (
-              <button
-                className={`control-btn ${props.datasetSize() === size ? 'active' : ''}`}
-                onClick={() => props.setDatasetSize(size)}
-              >
-                {size.toLocaleString('it-IT')}
-              </button>
-            ))}
+            {/* Usiamo <For> e rendiamo reattiva la classe active con una arrow function */}
+            <For each={datasetOptions}>
+              {(size) => (
+                <button
+                  className={`control-btn ${props.datasetSize() === size ? 'active' : ''}`}
+                  onClick={() => props.setDatasetSize(size)}
+                >
+                  {size.toLocaleString('it-IT')}
+                </button>
+              )}
+            </For>
           </div>
         </div>
 
         <div className="control-group">
           <span className="group-label">Update rate</span>
           <div className="btn-group">
-            {rateOptions.map((option) => (
-              <button
-                className={`control-btn ${props.updateRate() === option.value ? 'active' : ''}`}
-                onClick={() => props.setUpdateRate(option.value)}
-              >
-                {option.label}
-              </button>
-            ))}
+            <For each={rateOptions}>
+              {(option) => (
+                <button
+                  className={`control-btn ${props.updateRate() === option.value ? 'active' : ''}`}
+                  onClick={() => props.setUpdateRate(option.value)}
+                >
+                  {option.label}
+                </button>
+              )}
+            </For>
           </div>
         </div>
       </div>

@@ -15,7 +15,7 @@ const companies = [
 const formatNumber = (value) => Number(value || 0).toLocaleString("en-US");
 
 const getTrendPoints = (trend) => {
-  if (trend.length < 2) return "";
+  if (!trend || trend.length < 2) return "";
 
   const prices = trend.map((item) => item.price);
   const min = Math.min(...prices);
@@ -39,8 +39,8 @@ const MarketSummary = () => {
   createEffect(() => {
     try {
         const mockRows = generateMockTimeSeries(4).map((item, index) => ({
-        ...item,
-        icon: companies[index % companies.length].icon,
+          ...item,
+          icon: companies[index % companies.index || index].icon,
         }));
         setData(mockRows);
         setError(null);
@@ -49,7 +49,7 @@ const MarketSummary = () => {
     } finally {
         setLoading(false);
     }
-    });
+  });
 
   const sortedData = createMemo(() =>
     [...data()].sort((first, second) => {
@@ -61,7 +61,7 @@ const MarketSummary = () => {
           ? firstValue.localeCompare(secondValue)
           : firstValue - secondValue;
       return direction === "asc" ? comparison : -comparison;
-    }),
+    })
   );
 
   const changeSort = (key) =>
@@ -123,10 +123,10 @@ const MarketSummary = () => {
                   const Icon = item.icon;
                   const positive = item.changePercent >= 0;
                   return (
-                    <tr key={item.symbol}>
+                    <tr>
                       <td>
                         <span className="company-symbol">
-                          <Icon />
+                          {Icon && <Icon />}
                           {item.symbol}
                         </span>
                       </td>
@@ -144,7 +144,7 @@ const MarketSummary = () => {
                       </td>
                       <td>{formatNumber(item.volume)}</td>
                       <td className="trend-cell">
-                        <div style="width: 100%; height: 42px; display: block;">
+                        <div style={{ width: "100%", height: "42px", display: "block" }}>
                           <svg
                             viewBox="0 0 100 42"
                             width="100%"
@@ -157,8 +157,8 @@ const MarketSummary = () => {
                               points={getTrendPoints(item.trend)}
                               fill="none"
                               stroke={positive ? "#34d399" : "#fb7185"}
-                              stroke-width="2"
-                              vector-effect="non-scaling-stroke"
+                              strokeWidth="2"
+                              vectorEffect="non-scaling-stroke"
                             />
                           </svg>
                         </div>

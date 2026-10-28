@@ -1,4 +1,5 @@
 import { createEffect, createSignal, onCleanup } from 'solid-js';
+import { createStore, produce } from 'solid-js/store'; // <-- Fondamentale: usiamo lo Store
 import Header from './components/header/Header';
 import Section from './components/section/Section';
 import SystemMetrics from './components/systemMetrics/SystemMetrics';
@@ -10,42 +11,17 @@ import { useFPS } from './hooks/useFPS';
 import { useMemory } from './hooks/useMemory';
 import { useCPULoad } from './hooks/useCPULoad';
 import { useUpdateTime } from './hooks/useUpdateTime';
-// import { getTimeSeries } from './services/twelveDataService';
 import { generateMockTimeSeries } from './services/mockMarketData';
-
-/** PRINCIPALI DIFFERENZE
- * useState -> createSignal
- * useEffect -> createEffect
- * useMemo -> createMemo
- * For al posto di map
- **/
-
-const AVAILABLE_SYMBOLS = ["AAPL", "MSFT", "NVDA", "TSLA"];
-
-const createBenchmarkDataset = (sourceData, datasetSize) => {
-  if (!sourceData.length) return [];
-
-  return Array.from({ length: datasetSize }, (_, index) => {
-    const sourceItem = sourceData[index % sourceData.length];
-
-    const assignedSymbol = AVAILABLE_SYMBOLS[index % AVAILABLE_SYMBOLS.length];
-
-    return {
-      ...sourceItem,
-      symbol: assignedSymbol,
-      id: `${sourceItem.datetime}-${assignedSymbol}-${index}`,
-    };
-  });
-};
 
 function App() {
   const [loading, setLoading] = createSignal(false);
-  const [data, setData] = createSignal([]);
-  const [sourceData, setSourceData] = createSignal([]);
   const [error, setError] = createSignal(null);
   const [datasetSize, setDatasetSize] = createSignal(100);
   const [updateRate, setUpdateRate] = createSignal(10);
-  const [logs, setLogs] = createSignal([]);
+  
+  const [data, setData] = createStore([]);
+  const [logs, setLogs] = createStore([]);
+
   const fps = useFPS();
   const memory = useMemory();
   const updateTime = useUpdateTime();
@@ -75,56 +51,52 @@ function App() {
     let lastLogTime = Date.now();
 
     const interval = setInterval(() => {
-      setData((prevData) => {
-        if (prevData.length === 0) return prevData;
+      if (data.length === 0) return;
 
-        const randomIndex = Math.floor(Math.random() * prevData.length);
-        const updated = [...prevData];
-        const currentItem = updated[randomIndex];
+      const randomIndex = Math.floor(Math.random() * data.length);
+      const currentItem = data[randomIndex];
 
-        const currentClose = parseFloat(currentItem.close) || 0;
-        const newClose = (currentClose + (Math.random() - 0.5)).toFixed(2);
-        const oldClose = currentClose.toFixed(2);
+      const currentClose = parseFloat(currentItem.close) || 0;
+      const newClose = (currentClose + (Math.random() - 0.5)).toFixed(2);
+      const oldClose = currentClose.toFixed(2);
+      const diff = parseFloat(newClose) - parseFloat(oldClose);
+      const symbol = currentItem.symbol || "AAPL";
 
-        const diff = parseFloat(newClose) - parseFloat(oldClose);
+      setData(randomIndex, {
+        ...currentItem,
+        close: newClose,
+        lastUpdated: Date.now(),
+        flashDirection: diff > 0 ? "up" : diff < 0 ? "down" : null,
+      });
 
-        const symbol = currentItem.symbol || "AAPL";
+      const now = Date.now();
+      if (now - lastLogTime > 150) {
+        lastLogTime = now;
+        const timeString =
+          new Date().toTimeString().split(" ")[0] +
+          "." +
+          String(new Date().getMilliseconds()).padStart(3, "0").slice(0, 2);
+        const percentage =
+          parseFloat(oldClose) !== 0
+            ? ((diff / parseFloat(oldClose)) * 100).toFixed(2)
+            : "0.00";
 
-        updated[randomIndex] = {
-          ...currentItem,
-          close: newClose,
-          lastUpdated: Date.now(),
-          flashDirection: diff > 0 ? "up" : diff < 0 ? "down" : null,
+        const newLog = {
+          id: `${now}-${Math.random()}`,
+          time: timeString,
+          symbol: symbol,
+          oldPrice: oldClose,
+          newPrice: newClose,
+          change: percentage,
+          isPositive: diff > 0,
+          isNegative: diff < 0,
         };
 
-        const now = Date.now();
-        if (now - lastLogTime > 150) {
-          lastLogTime = now;
-          const timeString =
-            new Date().toTimeString().split(" ")[0] +
-            "." +
-            String(new Date().getMilliseconds()).padStart(3, "0").slice(0, 2);
-          const percentage =
-            parseFloat(oldClose) !== 0
-              ? ((diff / parseFloat(oldClose)) * 100).toFixed(2)
-              : "0.00";
-
-          const newLog = {
-            id: `${now}-${Math.random()}`,
-            time: timeString,
-            symbol: symbol,
-            oldPrice: oldClose,
-            newPrice: newClose,
-            change: percentage,
-            isPositive: diff > 0,
-            isNegative: diff < 0,
-          };
-
-          setLogs((prevLogs) => [newLog, ...prevLogs.slice(0, 5)]);
-        }
-
-        return updated;
-      });
+        setLogs(produce(currentLogs => {
+          currentLogs.unshift(newLog);
+          if (currentLogs.length > 5) currentLogs.pop();
+        }));
+      }
     }, intervalMs);
 
     onCleanup(() => clearInterval(interval));
