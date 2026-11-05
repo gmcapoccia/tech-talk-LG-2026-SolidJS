@@ -19,11 +19,11 @@ export default function Header(props) {
               <path fill="#76b3e1" d="M163 35S110-4 69 5L10 24C1 27-3 38 3 46l18 25c5 7 16 9 24 5l80-38c18-8 38 2 38 2z"/>
               <path fill="#518ac8" d="M3 119s53 39 94 30l59-19c9-3 13-14 7-22l-18-25c-5-7-16-9-24-5l-80 38c-18 8-38-2-38-2z"/>
               <path fill="#315aa9" d="M12 40s53 39 94 30l59-19c9-3 13-14 7-22l-18-25c-5-7-16-9-24-5l-80 38c-18 8-38-2-38-2z"/>
-            </svg>
+            </svg> 
           </div>
           <div className="brand-info">
             <div className="title-row">
-              <h1>Tech Talk LG - 2026</h1>
+              <h1>SolidJS</h1>
               <span className="badge">No Virtual DOM</span>
             </div>
             <div className="subtitle-row">
